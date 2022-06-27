@@ -1,0 +1,4 @@
+﻿interface IchildDraggrable
+{
+    void Drop();
+}

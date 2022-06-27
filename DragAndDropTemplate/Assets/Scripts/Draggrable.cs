@@ -102,7 +102,7 @@ public class Draggrable : MonoBehaviour
 
     }
 
-    public void Drop()
+    protected void Drop()
     {
         if (inWrongPosition())
             restartPosition();
@@ -242,40 +242,6 @@ public class Draggrable : MonoBehaviour
     {
         setTouchPosition();
         startDrag(dragging);
-    }
-
-    /*private bool verifyHitsToStartDrag()
-    {
-        pointTouchedInWorldGameSpace = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-
-        if (!dragging)
-        {
-            RaycastHit2D hit = Physics2D.Raycast(pointTouchedInWorldGameSpace, Vector2.zero);
-
-            if (hit.collider != null)
-            {
-                Draggrable draggrable = hit.transform.gameObject.GetComponent<Draggrable>();
-
-                if (draggrable != null)
-                {
-                    lastDraggrableSelected = draggrable;
-
-                    return true;
-                }
-            }
-        }
-        return false;
-    }*/
-
-    private bool verifyHitsToStartDrag()
-    {
-        if (!dragging)
-        {
-            lastDraggrableSelected = gameObject.GetComponent<Draggrable>();
-
-            return true;
-        }
-        return false;
     }
 
     private void startDrag(bool isdragging)
