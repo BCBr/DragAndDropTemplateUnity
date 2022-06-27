@@ -11,6 +11,8 @@ public class Draggrable : MonoBehaviour
 
     [SerializeField]
     private GameObject[] putBases = new GameObject[8];
+
+    GameObject selectedBase = null;
     //private int countPutBasesCollisions = 0;
 
     [SerializeField]
@@ -19,6 +21,29 @@ public class Draggrable : MonoBehaviour
     public bool dropped;
 
     private Vector2 startPosition;
+
+    private Vector2 touchPosition;
+    private Vector3 pointTouchedInWorldGameSpace;
+
+    private Draggrable lastDraggrableSelected;
+    private SpriteRenderer lastDraggrableSelectedImg;
+
+
+    [SerializeField]
+    private bool dragging;
+    private bool dragStarted;
+    float distanceTouchToDraggrableCenterX;
+    float distanceTouchToDraggrableCenterY;
+
+    private int sortingOrderDrag;
+
+    void Awake()
+    {
+        dragging = false;
+        dragStarted = false;
+
+        sortingOrderDrag = 200;
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -87,7 +112,7 @@ public class Draggrable : MonoBehaviour
 
     private void verifyClosiestPutBase()
     {
-        GameObject selectedBase = null;
+        selectedBase = null;
 
         float baseX = 0;
         float xDistance = 0;
@@ -123,24 +148,12 @@ public class Draggrable : MonoBehaviour
                     yDistance = Math.Abs(gameObject.transform.position.y - baseY);
                 }
 
-                /*Debug.Log((spriteBase.size.x * spriteBase.transform.localScale.x) / 2 + " >= " + xDistance + " && " + (spriteBase.size.y * spriteBase.transform.localScale.y) / 2 + ">=" + yDistance);
-                if ((spriteBase.size.x * spriteBase.transform.localScale.x) /2  >= xDistance && (spriteBase.size.y * spriteBase.transform.localScale.y) / 2 >= yDistance )
-                {
-                    selectedBase = putBases[i];
-                }*/
-
-                //Debug.Log((spriteBase.bounds.size.x ) + " >= " + xDistance * 2+ " && " + (spriteBase.bounds.size.y) + ">=" + yDistance*2);
                 if ((spriteBase.bounds.size.x) >= xDistance*2 && (spriteBase.bounds.size.y) >= yDistance*2 && Vector2.Distance(putBases[i].transform.position, gameObject.transform.position)<distance)
                 {
                     selectedBase = putBases[i];
                     distance = Vector2.Distance(putBases[i].transform.position, gameObject.transform.position);
                 }
-
-                //Debug.Log("size x: " + spriteBase.size.x + "----size y: " + spriteBase.size.y);
             }
-
-            //Debug.Log("loop " + i);
-            //Debug.Log(spriteBase.size.x / 2 +">"+ xDistance+ "&&"+ spriteBase.size.y / 2+ ">"+ yDistance);
             
         }
 
@@ -151,6 +164,11 @@ public class Draggrable : MonoBehaviour
         {
             restartPosition();
         }
+    }
+
+    protected GameObject getClosiestPutBase()
+    {
+        return selectedBase;
     }
 
     private void clearExitPutBase(GameObject selectedBase)
@@ -222,6 +240,106 @@ public class Draggrable : MonoBehaviour
 
     private void OnMouseDown()
     {
-        Destroy(gameObject);
+        setTouchPosition();
+        startDrag(dragging);
+    }
+
+    /*private bool verifyHitsToStartDrag()
+    {
+        pointTouchedInWorldGameSpace = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+
+        if (!dragging)
+        {
+            RaycastHit2D hit = Physics2D.Raycast(pointTouchedInWorldGameSpace, Vector2.zero);
+
+            if (hit.collider != null)
+            {
+                Draggrable draggrable = hit.transform.gameObject.GetComponent<Draggrable>();
+
+                if (draggrable != null)
+                {
+                    lastDraggrableSelected = draggrable;
+
+                    return true;
+                }
+            }
+        }
+        return false;
+    }*/
+
+    private bool verifyHitsToStartDrag()
+    {
+        if (!dragging)
+        {
+            lastDraggrableSelected = gameObject.GetComponent<Draggrable>();
+
+            return true;
+        }
+        return false;
+    }
+
+    private void startDrag(bool isdragging)
+    {
+        if (!isdragging)
+        {
+            dragging = true;
+            Vector2 startDraggrablePosition = transform.position;
+            distanceTouchToDraggrableCenterX = startDraggrablePosition.x - pointTouchedInWorldGameSpace.x;
+            distanceTouchToDraggrableCenterY = startDraggrablePosition.y - pointTouchedInWorldGameSpace.y;
+
+            lastDraggrableSelectedImg = gameObject.GetComponent<SpriteRenderer>();
+            //lastSortSelected = lastDraggrableSelectedImg.sortingOrder;
+            Debug.Log("dragging");
+        }
+    }
+
+    private void OnMouseDrag()
+    {
+        setTouchPosition();
+        drag(dragging);
+    }
+
+    private void drag(bool working)
+    {
+        if (working)
+        {
+            pointTouchedInWorldGameSpace.z = 0;
+
+            transform.position = new Vector2(pointTouchedInWorldGameSpace.x + distanceTouchToDraggrableCenterX, +pointTouchedInWorldGameSpace.y + distanceTouchToDraggrableCenterY);
+
+            lastDraggrableSelectedImg.sortingOrder = sortingOrderDrag;
+            
+        }
+    }
+
+    private void OnMouseUp()
+    {
+        dropDefaultConjuct();
+    }
+
+    private void dropDefaultConjuct()
+    {
+        //Debug.Log(lastDraggrableSelected.gameObject.name);
+        restartLayerOrder();
+        Drop();
+        dragging = false;
+    }
+
+    private void setTouchPosition()
+    {
+        if (Input.GetMouseButton(0))
+        {
+            Vector3 mouseClick = Input.mousePosition;
+
+            touchPosition.x = mouseClick.x;
+            touchPosition.y = mouseClick.y;
+
+        }
+        else if (Input.touchCount > 0)
+        {
+            touchPosition = Input.GetTouch(0).position;
+        }
+
+        pointTouchedInWorldGameSpace = Camera.main.ScreenToWorldPoint(touchPosition);
     }
 }

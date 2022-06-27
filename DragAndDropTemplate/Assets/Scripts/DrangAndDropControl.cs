@@ -47,16 +47,16 @@ public class DrangAndDropControl : MonoBehaviour
         //Transforms a point from screen space into world space
         //pointTouchedInWorldGameSpace = Camera.main.ScreenToWorldPoint(touchPosition);
 
-        if(dragging)
+        /*if(dragging)
         {
             drag();
 
-        }
+        }*/
 
-        if (dragging && (Input.GetMouseButtonUp(0) || (Input.touchCount == 1 && Input.GetTouch(0).phase == TouchPhase.Ended)))
+        /*if (dragging && (Input.GetMouseButtonUp(0) || (Input.touchCount == 1 && Input.GetTouch(0).phase == TouchPhase.Ended)))
         {
             drop();
-        }
+        }*/
     }
 
  
@@ -75,14 +75,17 @@ public class DrangAndDropControl : MonoBehaviour
         }
     }
 
-    private void drag()
+    private void drag(bool working)
     {
         
-        pointTouchedInWorldGameSpace.z = 0;
+        if(working)
+        {
+            pointTouchedInWorldGameSpace.z = 0;
 
-        lastDraggrableSelected.transform.position = new Vector2(pointTouchedInWorldGameSpace.x + distanceTouchToDraggrableCenterX, +pointTouchedInWorldGameSpace.y + distanceTouchToDraggrableCenterY);
-        
-        lastDraggrableSelectedImg.sortingOrder = sortingOrderDrag;
+            lastDraggrableSelected.transform.position = new Vector2(pointTouchedInWorldGameSpace.x + distanceTouchToDraggrableCenterX, +pointTouchedInWorldGameSpace.y + distanceTouchToDraggrableCenterY);
+
+            lastDraggrableSelectedImg.sortingOrder = sortingOrderDrag;
+        }
     }
 
     private void drop()
@@ -122,5 +125,15 @@ public class DrangAndDropControl : MonoBehaviour
             }
         }
         return false;
+    }
+
+    private void OnMouseDrag()
+    {
+        drag(dragging);
+    }
+
+    private void OnMouseUp()
+    {
+        drop();
     }
 }
