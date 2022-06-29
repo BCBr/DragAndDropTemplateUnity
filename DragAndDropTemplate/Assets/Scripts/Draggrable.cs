@@ -7,7 +7,8 @@ public class Draggrable : MonoBehaviour
 {
     [SerializeField]
     private int defaultLayerOrder;
-    private SpriteRenderer sprite;
+    [SerializeField]
+    protected SpriteRenderer sprite;
 
     [SerializeField]
     private GameObject[] putBases = new GameObject[8];
@@ -20,13 +21,14 @@ public class Draggrable : MonoBehaviour
 
     public bool dropped;
 
+    [SerializeField]
     private Vector2 startPosition;
 
     private Vector2 touchPosition;
     private Vector3 pointTouchedInWorldGameSpace;
 
     private Draggrable lastDraggrableSelected;
-    private SpriteRenderer lastDraggrableSelectedImg;
+    //private SpriteRenderer lastDraggrableSelectedImg;
 
 
     [SerializeField]
@@ -48,9 +50,14 @@ public class Draggrable : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        sprite = gameObject.GetComponent<SpriteRenderer>();
-        defaultLayerOrder = sprite.sortingOrder;
-        SortLayer.objListUpdate(gameObject);
+        Initialize();
+    }
+
+    protected void Initialize()
+    {
+        sprite = getActivedChildrenOrSelf(gameObject).GetComponent<SpriteRenderer>();
+        //defaultLayerOrder = sprite.sortingOrder;
+        SortLayer.objListUpdate(sprite.gameObject);
         startPosition = gameObject.transform.position;
         wrongPositionCount = 0;
     }
@@ -58,7 +65,7 @@ public class Draggrable : MonoBehaviour
     public void restartLayerOrder()
     {
         //sprite.sortingOrder = defaultLayerOrder;
-        SortLayer.sortDefaultsLayerOrder(gameObject);
+        SortLayer.sortDefaultsLayerOrder(sprite.gameObject);
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -102,7 +109,7 @@ public class Draggrable : MonoBehaviour
 
     }
 
-    protected void Drop()
+    protected virtual void Drop()
     {
         if (inWrongPosition())
             restartPosition();
@@ -166,7 +173,7 @@ public class Draggrable : MonoBehaviour
         }
     }
 
-    private GameObject getActivedChildrenOrSelf(GameObject toCheck)
+    protected GameObject getActivedChildrenOrSelf(GameObject toCheck)
     {
         for(int i = 0; i < toCheck.transform.childCount; i++)
         {
@@ -263,9 +270,8 @@ public class Draggrable : MonoBehaviour
             distanceTouchToDraggrableCenterX = startDraggrablePosition.x - pointTouchedInWorldGameSpace.x;
             distanceTouchToDraggrableCenterY = startDraggrablePosition.y - pointTouchedInWorldGameSpace.y;
 
-            lastDraggrableSelectedImg = gameObject.GetComponent<SpriteRenderer>();
+            //sprite = gameObject.GetComponent<SpriteRenderer>();
             //lastSortSelected = lastDraggrableSelectedImg.sortingOrder;
-            Debug.Log("dragging");
         }
     }
 
@@ -283,7 +289,7 @@ public class Draggrable : MonoBehaviour
 
             transform.position = new Vector2(pointTouchedInWorldGameSpace.x + distanceTouchToDraggrableCenterX, +pointTouchedInWorldGameSpace.y + distanceTouchToDraggrableCenterY);
 
-            lastDraggrableSelectedImg.sortingOrder = sortingOrderDrag;
+            sprite.sortingOrder = sortingOrderDrag;
             
         }
     }
