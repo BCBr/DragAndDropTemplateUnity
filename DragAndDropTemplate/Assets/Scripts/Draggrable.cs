@@ -125,7 +125,7 @@ public class Draggrable : MonoBehaviour
 
             if (putBases[i]!=null)
             {
-                spriteBase = putBases[i].GetComponent<SpriteRenderer>();
+                spriteBase = getActivedChildrenOrSelf(putBases[i]).GetComponent<SpriteRenderer>();
                 baseX = putBases[i].transform.position.x;
                 
                 if (gameObject.transform.position.x < baseX)
@@ -164,6 +164,16 @@ public class Draggrable : MonoBehaviour
         {
             restartPosition();
         }
+    }
+
+    private GameObject getActivedChildrenOrSelf(GameObject toCheck)
+    {
+        for(int i = 0; i < toCheck.transform.childCount; i++)
+        {
+            if (toCheck.transform.GetChild(i).gameObject.activeInHierarchy)
+                return toCheck.transform.GetChild(i).gameObject;
+        }
+        return toCheck;
     }
 
     protected GameObject getClosiestPutBase()
